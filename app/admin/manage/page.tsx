@@ -137,7 +137,7 @@ export default function ManageAdminsPage() {
               <div>
                 <label className="text-xs text-on-surface-variant uppercase">Temporary Password</label>
                 <input
-                  type="password"
+                  type="text"
                   minLength={8}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -174,94 +174,173 @@ export default function ManageAdminsPage() {
 
         {error && <p className="text-sm text-[#DC2626] mb-4">{error}</p>}
 
-        <div className="bg-white border overflow-x-auto">
-          <table className="w-full min-w-[600px] text-left border-collapse">
-            <thead>
-              <tr className="bg-[#F3F4F6] border-b">
-                <th className="p-4 text-xs uppercase tracking-wider">Admin</th>
-                <th className="p-4 text-xs uppercase tracking-wider">Role</th>
-                <th className="p-4 text-xs uppercase tracking-wider text-center">Status</th>
-                <th className="p-4 text-xs uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {loading ? (
-                <tr>
-                  <td colSpan={4} className="p-6 text-center text-on-surface-variant">
-                    Loading...
-                  </td>
+        {/* Responsive layout: Table on desktop, Cards on mobile */}
+        <div className="block">
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white border overflow-x-auto">
+            <table className="w-full min-w-[600px] text-left border-collapse">
+              <thead>
+                <tr className="bg-[#F3F4F6] border-b">
+                  <th className="p-4 text-xs uppercase tracking-wider">Admin</th>
+                  <th className="p-4 text-xs uppercase tracking-wider">Role</th>
+                  <th className="p-4 text-xs uppercase tracking-wider text-center">Status</th>
+                  <th className="p-4 text-xs uppercase tracking-wider text-right">Actions</th>
                 </tr>
-              ) : admins.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="p-6 text-center text-on-surface-variant">
-                    No admins found.
-                  </td>
-                </tr>
-              ) : (
-                admins.map((a) => (
-                  <tr key={a.id} className="hover:bg-surface-container-low transition-all">
-                    <td className="p-4">
-                      <div className="font-semibold text-sm">
-                        {a.fullName ?? "—"} {a.isSelf && <span className="text-xs text-on-surface-variant">(you)</span>}
-                      </div>
-                      <div className="text-xs text-on-surface-variant">{a.email}</div>
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`inline-block text-[10px] font-bold px-3 py-1 rounded-full uppercase ${
-                          a.role === "superadmin" ? "bg-black text-white" : "bg-[#6B21A8] text-white"
-                        }`}
-                      >
-                        {a.role}
-                      </span>
-                    </td>
-                    <td className="p-4 text-center">
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase border ${
-                          a.banned
-                            ? "bg-red-100 text-red-800 border-red-200"
-                            : "bg-green-100 text-green-800 border-green-200"
-                        }`}
-                      >
-                        {a.banned ? "Deactivated" : "Active"}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      {!a.isSelf && (
-                        <div className="flex justify-end gap-1">
-                          <button
-                            onClick={() => toggleRole(a)}
-                            title={a.role === "superadmin" ? "Demote to admin" : "Promote to superadmin"}
-                            className="p-1.5 hover:text-secondary transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-[20px]">
-                              {a.role === "superadmin" ? "arrow_downward" : "arrow_upward"}
-                            </span>
-                          </button>
-                          <button
-                            onClick={() => toggleBanned(a)}
-                            title={a.banned ? "Reactivate" : "Deactivate"}
-                            className="p-1.5 hover:text-orange-600 transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-[20px]">
-                              {a.banned ? "lock_open" : "lock"}
-                            </span>
-                          </button>
-                          <button
-                            onClick={() => deleteAdmin(a)}
-                            title="Delete"
-                            className="p-1.5 hover:text-error transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-[20px]">delete</span>
-                          </button>
-                        </div>
-                      )}
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading ? (
+                  <tr>
+                    <td colSpan={4} className="p-6 text-center text-on-surface-variant">
+                      Loading...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : admins.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="p-6 text-center text-on-surface-variant">
+                      No admins found.
+                    </td>
+                  </tr>
+                ) : (
+                  admins.map((a) => (
+                    <tr key={a.id} className="hover:bg-surface-container-low transition-all">
+                      <td className="p-4">
+                        <div className="font-semibold text-sm">
+                          {a.fullName ?? "—"} {a.isSelf && <span className="text-xs text-on-surface-variant">(you)</span>}
+                        </div>
+                        <div className="text-xs text-on-surface-variant">{a.email}</div>
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={`inline-block text-[10px] font-bold px-3 py-1 rounded-full uppercase ${
+                            a.role === "superadmin" ? "bg-black text-white" : "bg-[#6B21A8] text-white"
+                          }`}
+                        >
+                          {a.role}
+                        </span>
+                      </td>
+                      <td className="p-4 text-center">
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase border ${
+                            a.banned
+                              ? "bg-red-100 text-red-800 border-red-200"
+                              : "bg-green-100 text-green-800 border-green-200"
+                          }`}
+                        >
+                          {a.banned ? "Deactivated" : "Active"}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        {!a.isSelf && (
+                          <div className="flex justify-end gap-1">
+                            <button
+                              onClick={() => toggleRole(a)}
+                              title={a.role === "superadmin" ? "Demote to admin" : "Promote to superadmin"}
+                              className="p-1.5 hover:text-secondary transition-colors cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-[20px]">
+                                {a.role === "superadmin" ? "arrow_downward" : "arrow_upward"}
+                              </span>
+                            </button>
+                            <button
+                              onClick={() => toggleBanned(a)}
+                              title={a.banned ? "Reactivate" : "Deactivate"}
+                              className="p-1.5 hover:text-orange-600 transition-colors cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-[20px]">
+                                {a.banned ? "lock_open" : "lock"}
+                              </span>
+                            </button>
+                            <button
+                              onClick={() => deleteAdmin(a)}
+                              title="Delete"
+                              className="p-1.5 hover:text-error transition-colors cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-[20px]">delete</span>
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card Grid View */}
+          <div className="md:hidden space-y-4">
+            {loading ? (
+              <p className="text-center text-sm text-on-surface-variant py-6">Loading...</p>
+            ) : admins.length === 0 ? (
+              <p className="text-center text-sm text-on-surface-variant py-6">No admins found.</p>
+            ) : (
+              admins.map((a) => (
+                <div key={a.id} className="bg-white border border-outline-variant rounded-2xl p-5 shadow-sm space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0 uppercase">
+                      {(a.fullName ?? a.email).substring(0, 2)}
+                    </div>
+                    <div className="min-w-0 flex-grow">
+                      <div className="font-semibold text-sm text-on-surface truncate flex items-center gap-2">
+                        {a.fullName ?? "—"}
+                        {a.isSelf && <span className="text-[10px] text-on-surface-variant bg-gray-100 px-2 py-0.5 rounded-full font-normal">(you)</span>}
+                      </div>
+                      <div className="text-xs text-on-surface-variant truncate">{a.email}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <span
+                      className={`inline-block text-[10px] font-bold px-3 py-1 rounded-full uppercase ${
+                        a.role === "superadmin" ? "bg-black text-white" : "bg-[#6B21A8] text-white"
+                      }`}
+                    >
+                      {a.role}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase border ${
+                        a.banned
+                          ? "bg-red-100 text-red-800 border-red-200"
+                          : "bg-green-100 text-green-800 border-green-200"
+                      }`}
+                    >
+                      {a.banned ? "Deactivated" : "Active"}
+                    </span>
+                  </div>
+
+                  {!a.isSelf && (
+                    <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
+                      <button
+                        onClick={() => toggleRole(a)}
+                        className="flex items-center gap-1 text-xs font-bold text-outline hover:text-secondary transition-all cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          {a.role === "superadmin" ? "arrow_downward" : "arrow_upward"}
+                        </span>
+                        {a.role === "superadmin" ? "Demote" : "Promote"}
+                      </button>
+                      <button
+                        onClick={() => toggleBanned(a)}
+                        className="flex items-center gap-1 text-xs font-bold text-outline hover:text-orange-600 transition-all cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          {a.banned ? "lock_open" : "lock"}
+                        </span>
+                        {a.banned ? "Reactivate" : "Deactivate"}
+                      </button>
+                      <button
+                        onClick={() => deleteAdmin(a)}
+                        className="flex items-center gap-1 text-xs font-bold text-outline hover:text-error transition-all cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </main>
     </AdminShell>
