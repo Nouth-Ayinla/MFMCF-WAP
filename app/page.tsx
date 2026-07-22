@@ -11,6 +11,7 @@ export default function VerifyPage() {
   const [unitError, setUnitError] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/verify/units")
@@ -27,6 +28,18 @@ export default function VerifyPage() {
         setUnits([]);
       });
   }, []);
+
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("#unit-select-container")) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, [isDropdownOpen]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -97,29 +110,43 @@ export default function VerifyPage() {
               <label className="block font-label-bold text-label-bold text-on-surface uppercase" htmlFor="unit-select">
                 Select Your Unit
               </label>
-              <div className="relative">
-                <select
+              <div id="unit-select-container" className="relative">
+                <button
+                  type="button"
                   id="unit-select"
-                  value={unit}
-                  onChange={(e) => {
-                    setUnit(e.target.value);
-                    setUnitError(false);
-                  }}
-                  className={`w-full bg-surface-container-low border rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-container focus:border-primary-container appearance-none font-body-md text-on-surface cursor-pointer ${unitError ? "border-[#DC2626]" : "border-outline"
-                    }`}
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className={`w-full bg-surface-container-low border rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-container focus:border-primary-container font-body-md text-on-surface cursor-pointer text-left flex justify-between items-center transition-all ${
+                    unitError ? "border-[#DC2626]" : "border-outline"
+                  }`}
                 >
-                  <option disabled value="">
-                    Choose your unit...
-                  </option>
-                  {units.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
-                    </option>
-                  ))}
-                </select>
-                <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">
-                  expand_more
-                </span>
+                  <span className={unit ? "text-on-surface" : "text-on-surface-variant/60"}>
+                    {unit || "Choose your unit..."}
+                  </span>
+                  <span className={`material-symbols-outlined text-on-surface-variant transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`}>
+                    expand_more
+                  </span>
+                </button>
+                
+                {isDropdownOpen && (
+                  <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-outline rounded-lg shadow-lg max-h-[245px] overflow-y-auto">
+                    {units.map((u) => (
+                      <button
+                        key={u}
+                        type="button"
+                        onClick={() => {
+                          setUnit(u);
+                          setUnitError(false);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 font-body-md hover:bg-primary-fixed transition-colors ${
+                          unit === u ? "bg-primary-fixed text-primary font-bold" : "text-on-surface hover:text-primary"
+                        }`}
+                      >
+                        {u}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               {unitError && (
                 <p className="text-[#DC2626] font-label-md text-label-md">
