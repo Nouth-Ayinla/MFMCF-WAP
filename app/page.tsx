@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const FALLBACK_UNITS = ["Ushering", "Media & Tech", "Choir", "Sanctuary", "Prayer"];
-
 export default function VerifyPage() {
   const router = useRouter();
   const [units, setUnits] = useState<string[]>([]);
@@ -18,15 +16,15 @@ export default function VerifyPage() {
     fetch("/api/verify/units")
       .then((res) => res.json())
       .then((data) => {
-        if (data.units && data.units.length > 0) {
+        if (data.units && Array.isArray(data.units)) {
           setUnits(data.units);
         } else {
-          setUnits(FALLBACK_UNITS);
+          setUnits([]);
         }
       })
       .catch((err) => {
-        console.error(err);
-        setUnits(FALLBACK_UNITS);
+        console.error("Failed to fetch units:", err);
+        setUnits([]);
       });
   }, []);
 

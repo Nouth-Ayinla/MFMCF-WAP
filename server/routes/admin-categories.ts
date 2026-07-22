@@ -47,7 +47,9 @@ router.post("/", requireAuth, async (req, res) => {
     return;
   }
 
-  const slug = title
+  const categoryUnit = unit ? String(unit).trim() : "All Units";
+  const slugBase = categoryUnit === "All Units" ? title : `${title}-${categoryUnit}`;
+  const slug = slugBase
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
@@ -56,7 +58,7 @@ router.post("/", requireAuth, async (req, res) => {
   try {
     const existing = await prisma.category.findUnique({ where: { slug } });
     if (existing) {
-      res.status(400).json({ error: "A category with a similar title already exists." });
+      res.status(400).json({ error: "A category with a similar title and unit already exists." });
       return;
     }
 
@@ -66,7 +68,7 @@ router.post("/", requireAuth, async (req, res) => {
         slug,
         description: description.trim(),
         order: Number(order ?? 0),
-        unit: unit ? String(unit).trim() : "All Units",
+        unit: categoryUnit,
         nominees: {
           create: nomineeNames.map((name) => ({ name })),
         },
@@ -109,7 +111,9 @@ router.patch("/:id", requireAuth, async (req, res) => {
     return;
   }
 
-  const slug = title
+  const categoryUnit = unit ? String(unit).trim() : "All Units";
+  const slugBase = categoryUnit === "All Units" ? title : `${title}-${categoryUnit}`;
+  const slug = slugBase
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
@@ -126,11 +130,11 @@ router.patch("/:id", requireAuth, async (req, res) => {
       return;
     }
 
-    // Check slug uniqueness if title changed
+    // Check slug uniqueness if title or unit changed
     if (slug !== category.slug) {
       const existing = await prisma.category.findUnique({ where: { slug } });
       if (existing) {
-        res.status(400).json({ error: "A category with a similar title already exists." });
+        res.status(400).json({ error: "A category with a similar title and unit already exists." });
         return;
       }
     }
@@ -144,7 +148,7 @@ router.patch("/:id", requireAuth, async (req, res) => {
           slug,
           description: description.trim(),
           order: Number(order ?? 0),
-          unit: unit ? String(unit).trim() : "All Units",
+          unit: categoryUnit,
         },
       });
 

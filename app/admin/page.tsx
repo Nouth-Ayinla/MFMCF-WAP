@@ -101,21 +101,33 @@ export default function AdminOverviewPage() {
           <StatCard
             icon="how_to_vote"
             label="Total Votes Cast"
-            value={loading ? "—" : data?.totalVotes ?? 0}
-            sub="+ live"
+            value={loading ? "—" : data?.totalVotes && data.totalVotes > 0 ? data.totalVotes : "—"}
+            sub={data?.totalVotes && data.totalVotes > 0 ? "+ live" : "No votes cast"}
           />
           {data?.isFiltered ? (
             <StatCard
               icon="group"
               label="Participating Members"
-              value={loading ? "—" : `${data?.participatingMembers ?? 0} / ${data?.totalMembers ?? 0}`}
+              value={
+                loading
+                  ? "—"
+                  : data?.totalMembers && data.totalMembers > 0
+                  ? `${data.participatingMembers ?? 0} / ${data.totalMembers}`
+                  : "—"
+              }
               sub="Members active"
             />
           ) : (
             <StatCard
               icon="hub"
               label="Participating Units"
-              value={loading ? "—" : `${data?.participatingUnits ?? 0} / ${data?.totalUnits ?? 0}`}
+              value={
+                loading
+                  ? "—"
+                  : data?.totalUnits && data.totalUnits > 0
+                  ? `${data.participatingUnits ?? 0} / ${data.totalUnits}`
+                  : "—"
+              }
               sub="Units active"
             />
           )}
@@ -123,7 +135,7 @@ export default function AdminOverviewPage() {
             icon="military_tech"
             label="Top Voting Unit"
             value={loading ? "—" : data?.topVotingUnit?.unit ?? "—"}
-            sub={data?.topVotingUnit ? `${data.topVotingUnit.votes} votes` : undefined}
+            sub={data?.topVotingUnit ? `${data.topVotingUnit.votes} votes` : "No votes cast"}
             accent
           />
           <StatCard icon="sensors" label="System Status" value="100%" sub="Operational" />
