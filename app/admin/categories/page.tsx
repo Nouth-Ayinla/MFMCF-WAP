@@ -115,6 +115,23 @@ export default function CategoryManagementPage() {
   };
 
   const updateNomineeField = (index: number, val: string) => {
+    // Check if the pasted value contains commas or newlines
+    if (val.includes(",") || val.includes("\n")) {
+      const parts = val.split(/[,\n]/).map((p) => p.trim()).filter(Boolean);
+      if (parts.length > 1) {
+        const updated = [...nominees];
+        // Replace the current field with the first part
+        updated[index] = { ...updated[index], name: parts[0] };
+        // Create new fields for the rest of the parts
+        const newNominees = parts.slice(1).map((name) => ({ name }));
+        // Insert them immediately after the current index
+        updated.splice(index + 1, 0, ...newNominees);
+        setNominees(updated);
+        setFormError(null);
+        return;
+      }
+    }
+
     const updated = [...nominees];
     updated[index].name = val;
     setNominees(updated);
@@ -284,19 +301,19 @@ export default function CategoryManagementPage() {
                         <h2 className="text-lg font-bold text-on-surface leading-snug">{cat.title}</h2>
                       </div>
 
-                      {/* Action buttons */}
-                      <div className="flex items-center gap-1 shrink-0">
+                      {/* Action buttons (desktop only) */}
+                      <div className="hidden md:flex items-center gap-1 shrink-0">
                         <button
                           onClick={() => openEditDrawer(cat)}
                           title="Edit Category"
-                          className="w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center text-outline hover:text-primary hover:bg-surface-container-low transition-colors select-none min-h-[36px]"
+                          className="w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center text-outline hover:text-primary hover:bg-surface-container-low transition-colors select-none min-h-[36px] cursor-pointer"
                         >
                           <span className="material-symbols-outlined text-[18px]">edit</span>
                         </button>
                         <button
                           onClick={() => triggerDeleteCategory(cat)}
                           title="Delete Category"
-                          className="w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center text-outline hover:text-error hover:bg-rose-50 transition-colors select-none min-h-[36px]"
+                          className="w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center text-outline hover:text-error hover:bg-rose-50 transition-colors select-none min-h-[36px] cursor-pointer"
                         >
                           <span className="material-symbols-outlined text-[18px]">delete</span>
                         </button>
@@ -339,6 +356,24 @@ export default function CategoryManagementPage() {
                           );
                         })}
                       </div>
+                    </div>
+
+                    {/* Action buttons (mobile only) */}
+                    <div className="md:hidden flex items-center justify-end gap-2 border-t pt-4 mt-6">
+                      <button
+                        onClick={() => openEditDrawer(cat)}
+                        className="flex items-center justify-center gap-1.5 px-4 py-2 border rounded-full text-xs font-bold text-outline hover:text-primary hover:bg-surface-container-low transition-all cursor-pointer select-none min-h-[34px]"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">edit</span>
+                        Edit Category
+                      </button>
+                      <button
+                        onClick={() => triggerDeleteCategory(cat)}
+                        className="flex items-center justify-center gap-1.5 px-4 py-2 border border-rose-100 rounded-full text-xs font-bold text-[#B91C1C] hover:text-error hover:bg-rose-50 hover:border-rose-200 transition-all cursor-pointer select-none min-h-[34px]"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">delete</span>
+                        Delete
+                      </button>
                     </div>
                   </div>
                 </div>
