@@ -136,7 +136,7 @@ export default function VotePage() {
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="w-full bg-black text-white py-4 px-8 rounded-full font-label-bold text-body-lg hover:bg-neutral-800 transition-all shadow-[0px_4px_0px_0px_rgba(107,33,168,1)] active:translate-y-1 active:shadow-none flex items-center justify-center gap-2 disabled:opacity-60"
+            className="w-full bg-black text-white py-4 px-8 rounded-full font-label-bold text-body-lg hover:bg-[#6B21A8] transition-all shadow-[0px_4px_0px_0px_rgba(107,33,168,1)] active:translate-y-1 active:shadow-none flex items-center justify-center gap-2 disabled:opacity-60"
           >
             {submitting ? "Submitting..." : "Review & Submit Votes ✨"}
           </button>

@@ -154,12 +154,12 @@ export default function VerifyPage() {
             <button
               type="submit"
               disabled={status === "loading"}
-              className="w-full bg-black text-white py-4 rounded-full font-headline-md hover:bg-zinc-800 transition-all active:scale-95 hard-shadow flex items-center justify-center gap-2 group mt-8 disabled:opacity-60"
+              className="w-full bg-black text-white py-4 rounded-full font-headline-md hover:bg-[#6B21A8] transition-all active:scale-95 hard-shadow flex items-center justify-center gap-2 group mt-8 disabled:opacity-60"
             >
               <span>{status === "loading" ? "Verifying Identity..." : "Begin Voting"}</span>
-              <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">
-                arrow_forward
-              </span>
+              <svg width="9" height="18" viewBox="0 0 9 18" fill="none" xmlns="http://www.w3.org/2000/svg" className="rotate-180 transition-transform group-hover:translate-x-1 shrink-0">
+                <path d="M8.76392 1.39569L1.84742 8.42319C1.69573 8.57652 1.61064 8.7835 1.61064 8.99919C1.61064 9.21488 1.69573 9.42186 1.84742 9.57519L8.76242 16.6042C8.91403 16.7585 8.99899 16.9661 8.99899 17.1824C8.99899 17.3988 8.91403 17.6064 8.76242 17.7607C8.68835 17.8367 8.59983 17.897 8.50207 17.9383C8.4043 17.9795 8.29927 18.0007 8.19317 18.0007C8.08707 18.0007 7.98204 17.9795 7.88427 17.9383C7.78651 17.897 7.69799 17.8367 7.62392 17.7607L0.70892 10.7347C0.254531 10.2719 -4.76837e-05 9.64926 -4.76837e-05 9.00069C-4.76837e-05 8.35213 0.254531 7.72948 0.70892 7.26669L7.62392 0.240692C7.69801 0.16449 7.78663 0.103916 7.88453 0.0625534C7.98243 0.0211906 8.08764 -0.000120163 8.19392 -0.000120163C8.3002 -0.000120163 8.40541 0.0211906 8.50331 0.0625534C8.60121 0.103916 8.68983 0.16449 8.76392 0.240692C8.91553 0.394976 9.00049 0.602633 9.00049 0.818943C9.00049 1.03525 8.91553 1.24291 8.76392 1.39719" fill="currentColor"/>
+              </svg>
             </button>
           </form>
         </div>

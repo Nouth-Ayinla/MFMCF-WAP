@@ -117,7 +117,7 @@ function SuccessContent() {
         <div className="mt-12 w-full flex flex-col items-center gap-4">
           <button
             onClick={() => router.push("/")}
-            className="w-full max-w-sm h-14 bg-black text-white rounded-full font-label-bold text-lg flex items-center justify-center gap-3 hard-shadow active:translate-y-1 transition-all duration-150"
+            className="w-full max-w-sm h-14 bg-black text-white rounded-full font-label-bold text-lg flex items-center justify-center gap-3 hard-shadow active:translate-y-1 hover:bg-[#6B21A8] transition-all duration-150"
           >
             <span className="material-symbols-outlined">refresh</span>
             Cast Another Vote (Shared Device)

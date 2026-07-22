@@ -83,7 +83,7 @@ export default function AdminOverviewPage() {
             </select>
           </div>
         </div>
-        <button className="hidden md:flex items-center gap-2 bg-black text-white px-4 py-2 rounded font-semibold text-sm hover:opacity-90">
+        <button className="hidden md:flex items-center gap-2 bg-black text-white px-4 py-2 rounded font-semibold text-sm hover:bg-[#6B21A8] transition-colors">
           <span className="material-symbols-outlined text-[18px]">download</span>
           Export Results (CSV)
         </button>
@@ -91,7 +91,7 @@ export default function AdminOverviewPage() {
 
       <main className="p-4 md:p-10 max-w-container-max mx-auto w-full">
         {/* Mobile export button, full-width under the header */}
-        <button className="md:hidden w-full mb-4 flex items-center justify-center gap-2 bg-black text-white px-4 py-3 rounded-lg font-semibold text-sm">
+        <button className="md:hidden w-full mb-4 flex items-center justify-center gap-2 bg-black text-white px-4 py-3 rounded-lg font-semibold text-sm hover:bg-[#6B21A8] transition-colors">
           <span className="material-symbols-outlined text-[18px]">download</span>
           Export Results (CSV)
         </button>
