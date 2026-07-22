@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum WorkerStatus {
+  VERIFIED
+  PENDING
+}
+
+// The roster of church workers admins manage (name + unit mapping),
+// distinct from Voter (who is casting a ballot) and Nominee (who appears
+// on a specific category's ballot).
+model Worker {
+  id        String       @id @default(cuid())
+  name      String
+  unit      String
+  status    WorkerStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+}
+
+model Voter {
+  id        String   @id @default(cuid())
+  name      String
+  unit      String
+  // stable identity hash of normalized(name+unit), used to stop the same
+  // person voting twice in a category while still allowing "shared device"
+  // mode where different people use the same browser/session.
+  identityHash String @unique
+  createdAt DateTime @default(now())
+  votes     Vote[]
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  description String
+  order       Int       @default(0)
+  unit        String    @default("All Units")
+  nominees    Nominee[]
+  votes       Vote[]
+}
+
+model Nominee {
+  id         String   @id @default(cuid())
+  name       String
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  votes      Vote[]
+}
+
+model Vote {
+  id         String   @id @default(cuid())
+  voterId    String
+  voter      Voter    @relation(fields: [voterId], references: [id])
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  nomineeId  String
+  nominee    Nominee  @relation(fields: [nomineeId], references: [id])
+  createdAt  DateTime @default(now())
+
+  // one vote per person per category — this is what stops double voting
+  @@unique([voterId, categoryId])
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String?
+  role         String   @default("admin") // "admin" or "superadmin"
+  banned       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
+model Unit {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String
+  adminId   String?
+  adminName String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
