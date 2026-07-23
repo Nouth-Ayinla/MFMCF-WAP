@@ -56,7 +56,7 @@ export default function AdminOverviewPage() {
 
   const maxLeaderboardVotes = Math.max(
     1,
-    ...(data?.leaderboard.flatMap((c) => c.nominees.map((n) => n.votes)) ?? [1])
+    ...(data?.leaderboard?.flatMap((c) => c.nominees.map((n) => n.votes)) ?? [1])
   );
 
   return (
@@ -151,11 +151,11 @@ export default function AdminOverviewPage() {
 
             {loading ? (
               <p className="text-sm text-on-surface-variant">Loading standings...</p>
-            ) : data?.leaderboard.length === 0 ? (
+            ) : (data?.leaderboard?.length ?? 0) === 0 ? (
               <p className="text-sm text-on-surface-variant">No votes recorded yet.</p>
             ) : (
               <div className="space-y-8">
-                {data?.leaderboard.map((cat) => (
+                {data?.leaderboard?.map((cat) => (
                   <div key={cat.title}>
                     <h3 className="text-xs font-bold text-primary uppercase tracking-widest mb-3">{cat.title}</h3>
                     <div className="space-y-3">
@@ -192,10 +192,10 @@ export default function AdminOverviewPage() {
             <div className="flex-grow overflow-y-auto -mr-2 pr-2 space-y-4">
               {loading ? (
                 <p className="text-sm text-on-surface-variant">Loading...</p>
-              ) : data?.recentActivity.length === 0 ? (
+              ) : (data?.recentActivity?.length ?? 0) === 0 ? (
                 <p className="text-sm text-on-surface-variant">No activity yet.</p>
               ) : (
-                data?.recentActivity.map((a) => (
+                data?.recentActivity?.map((a) => (
                   <div key={a.id} className="border-l-2 border-green-500 pl-3">
                     <p className="text-sm">
                       New vote submitted from <span className="font-bold">{a.voterUnit}</span>
