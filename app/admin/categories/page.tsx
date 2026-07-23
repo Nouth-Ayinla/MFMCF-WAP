@@ -27,6 +27,7 @@ type Category = {
 export default function CategoryManagementPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLocked, setCategoriesLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,6 +59,7 @@ export default function CategoryManagementPage() {
       }
       const data = await res.json();
       setCategories(data.categories ?? []);
+      setCategoriesLocked(data.categoriesLocked ?? false);
     } catch (err: any) {
       console.error(err);
       setError(err.message ?? "Failed to fetch categories.");
@@ -228,16 +230,27 @@ export default function CategoryManagementPage() {
       {/* Header */}
       <header className="sticky top-14 md:top-0 z-40 bg-white border-b px-4 md:px-10 py-4 md:h-16 flex items-center justify-between">
         <h1 className="text-xl md:text-2xl font-bold text-primary">Category Management</h1>
-        <button
-          onClick={openAddDrawer}
-          className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-all flex items-center gap-1.5 min-h-[40px] select-none"
-        >
-          <span className="material-symbols-outlined text-[18px]">add_circle</span>
-          Add Category
-        </button>
+        {!categoriesLocked && (
+          <button
+            onClick={openAddDrawer}
+            className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-all flex items-center gap-1.5 min-h-[40px] select-none"
+          >
+            <span className="material-symbols-outlined text-[18px]">add_circle</span>
+            Add Category
+          </button>
+        )}
       </header>
 
       <main className="flex-grow p-4 md:p-10 max-w-container-max mx-auto w-full">
+        {categoriesLocked && (
+          <div className="bg-amber-50 border-l-4 border-amber-500 text-amber-800 p-4 rounded-r-xl shadow-sm text-sm mb-6 flex items-center gap-3">
+            <span className="material-symbols-outlined text-amber-600">lock</span>
+            <div>
+              <span className="font-bold">Category Management is Locked.</span> Modifications, additions, and deletions are disabled because the election is active.
+            </div>
+          </div>
+        )}
+
         <div className="mb-6">
           <p className="text-on-surface-variant text-sm md:text-base">
             Create and edit election categories, assign nominees, and monitor real-time vote distribution.
@@ -262,13 +275,15 @@ export default function CategoryManagementPage() {
             <p className="text-sm text-on-surface-variant mb-6">
               Create your first voting category to get the election started.
             </p>
-            <button
-              onClick={openAddDrawer}
-              className="bg-primary text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 inline-flex items-center gap-2"
-            >
-              <span className="material-symbols-outlined text-[18px]">add_circle</span>
-              Add Category
-            </button>
+            {!categoriesLocked && (
+              <button
+                onClick={openAddDrawer}
+                className="bg-primary text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 inline-flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                Add Category
+              </button>
+            )}
           </div>
         ) : (
           /* Responsive Categories List */
@@ -302,22 +317,24 @@ export default function CategoryManagementPage() {
                       </div>
 
                       {/* Action buttons (desktop only) */}
-                      <div className="hidden md:flex items-center gap-1 shrink-0">
-                        <button
-                          onClick={() => openEditDrawer(cat)}
-                          title="Edit Category"
-                          className="w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center text-outline hover:text-primary hover:bg-surface-container-low transition-colors select-none min-h-[36px] cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">edit</span>
-                        </button>
-                        <button
-                          onClick={() => triggerDeleteCategory(cat)}
-                          title="Delete Category"
-                          className="w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center text-outline hover:text-error hover:bg-rose-50 transition-colors select-none min-h-[36px] cursor-pointer"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">delete</span>
-                        </button>
-                      </div>
+                      {!categoriesLocked && (
+                        <div className="hidden md:flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={() => openEditDrawer(cat)}
+                            title="Edit Category"
+                            className="w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center text-outline hover:text-primary hover:bg-surface-container-low transition-colors select-none min-h-[36px] cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">edit</span>
+                          </button>
+                          <button
+                            onClick={() => triggerDeleteCategory(cat)}
+                            title="Delete Category"
+                            className="w-9 h-9 rounded-full border border-gray-100 flex items-center justify-center text-outline hover:text-error hover:bg-rose-50 transition-colors select-none min-h-[36px] cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     {/* Description */}
@@ -359,22 +376,24 @@ export default function CategoryManagementPage() {
                     </div>
 
                     {/* Action buttons (mobile only) */}
-                    <div className="md:hidden flex items-center justify-end gap-2 border-t pt-4 mt-6">
-                      <button
-                        onClick={() => openEditDrawer(cat)}
-                        className="flex items-center justify-center gap-1.5 px-4 py-2 border rounded-full text-xs font-bold text-outline hover:text-primary hover:bg-surface-container-low transition-all cursor-pointer select-none min-h-[34px]"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">edit</span>
-                        Edit Category
-                      </button>
-                      <button
-                        onClick={() => triggerDeleteCategory(cat)}
-                        className="flex items-center justify-center gap-1.5 px-4 py-2 border border-rose-100 rounded-full text-xs font-bold text-[#B91C1C] hover:text-error hover:bg-rose-50 hover:border-rose-200 transition-all cursor-pointer select-none min-h-[34px]"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">delete</span>
-                        Delete
-                      </button>
-                    </div>
+                    {!categoriesLocked && (
+                      <div className="md:hidden flex items-center justify-end gap-2 border-t pt-4 mt-6">
+                        <button
+                          onClick={() => openEditDrawer(cat)}
+                          className="flex items-center justify-center gap-1.5 px-4 py-2 border rounded-full text-xs font-bold text-outline hover:text-primary hover:bg-surface-container-low transition-all cursor-pointer select-none min-h-[34px]"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">edit</span>
+                          Edit Category
+                        </button>
+                        <button
+                          onClick={() => triggerDeleteCategory(cat)}
+                          className="flex items-center justify-center gap-1.5 px-4 py-2 border border-rose-100 rounded-full text-xs font-bold text-[#B91C1C] hover:text-error hover:bg-rose-50 hover:border-rose-200 transition-all cursor-pointer select-none min-h-[34px]"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">delete</span>
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );

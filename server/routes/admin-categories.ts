@@ -8,21 +8,26 @@ const router = Router();
 // Get all categories with nominees and vote counts
 router.get("/", requireAuth, async (req, res) => {
   try {
-    const categories = await prisma.category.findMany({
-      orderBy: { order: "asc" },
-      include: {
-        nominees: {
-          orderBy: { name: "asc" },
-          include: {
-            _count: {
-              select: { votes: true },
+    const [categories, settings] = await Promise.all([
+      prisma.category.findMany({
+        orderBy: { order: "asc" },
+        include: {
+          nominees: {
+            orderBy: { name: "asc" },
+            include: {
+              _count: {
+                select: { votes: true },
+              },
             },
           },
         },
-      },
-    });
+      }),
+      prisma.electionSetting.findUnique({
+        where: { id: "settings" },
+      }),
+    ]);
 
-    res.json({ categories });
+    res.json({ categories, categoriesLocked: settings?.categoriesLocked ?? false });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch categories." });
@@ -31,6 +36,14 @@ router.get("/", requireAuth, async (req, res) => {
 
 // Create a new category and its nominees
 router.post("/", requireAuth, async (req, res) => {
+  const settings = await prisma.electionSetting.findUnique({
+    where: { id: "settings" },
+  });
+  if (settings?.categoriesLocked) {
+    res.status(403).json({ error: "Category management is currently locked by a superadmin." });
+    return;
+  }
+
   const { title, description, order, nominees, unit } = req.body;
 
   if (!title || !description) {
@@ -88,6 +101,14 @@ router.post("/", requireAuth, async (req, res) => {
 
 // Update a category and sync its nominees
 router.patch("/:id", requireAuth, async (req, res) => {
+  const settings = await prisma.electionSetting.findUnique({
+    where: { id: "settings" },
+  });
+  if (settings?.categoriesLocked) {
+    res.status(403).json({ error: "Category management is currently locked by a superadmin." });
+    return;
+  }
+
   const { id } = req.params;
   const { title, description, order, nominees, unit } = req.body;
 
@@ -130,16 +151,18 @@ router.patch("/:id", requireAuth, async (req, res) => {
       return;
     }
 
-    // Check slug uniqueness if title or unit changed
-    if (slug !== category.slug) {
-      const existing = await prisma.category.findUnique({ where: { slug } });
-      if (existing) {
-        res.status(400).json({ error: "A category with a similar title and unit already exists." });
-        return;
-      }
-    }
-
     await prisma.$transaction(async (tx) => {
+      // If slug has changed, delete any existing category with the new slug first
+      if (slug !== category.slug) {
+        const existing = await tx.category.findUnique({ where: { slug } });
+        if (existing) {
+          // Delete votes, nominees, and category itself
+          await tx.vote.deleteMany({ where: { categoryId: existing.id } });
+          await tx.nominee.deleteMany({ where: { categoryId: existing.id } });
+          await tx.category.delete({ where: { id: existing.id } });
+        }
+      }
+
       // 1. Update basic category info
       await tx.category.update({
         where: { id },
@@ -198,6 +221,14 @@ router.patch("/:id", requireAuth, async (req, res) => {
 
 // Delete a category and clean up votes/nominees
 router.delete("/:id", requireAuth, async (req, res) => {
+  const settings = await prisma.electionSetting.findUnique({
+    where: { id: "settings" },
+  });
+  if (settings?.categoriesLocked) {
+    res.status(403).json({ error: "Category management is currently locked by a superadmin." });
+    return;
+  }
+
   const { id } = req.params;
 
   try {

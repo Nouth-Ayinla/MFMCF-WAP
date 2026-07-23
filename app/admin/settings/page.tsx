@@ -7,6 +7,7 @@ import AdminShell from "@/components/admin/AdminShell";
 type ElectionSettings = {
   status: "active" | "stopped";
   endsAt: string | null;
+  categoriesLocked: boolean;
   updatedAt?: string;
 };
 
@@ -45,6 +46,7 @@ export default function SettingsPage() {
   // Form states
   const [timerInput, setTimerInput] = useState("");
   const [systemTime, setSystemTime] = useState("");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     // Live clock for admin reference
@@ -53,6 +55,18 @@ export default function SettingsPage() {
     }, 1000);
     setSystemTime(new Date().toLocaleTimeString());
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/auth/me")
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error();
+      })
+      .then((data) => {
+        setIsSuperAdmin(data.admin?.role === "superadmin");
+      })
+      .catch(() => {});
   }, []);
 
   const loadSettings = async () => {
@@ -82,6 +96,42 @@ export default function SettingsPage() {
   useEffect(() => {
     loadSettings();
   }, []);
+
+  const handleToggleCategoryLock = async () => {
+    if (!settings) return;
+    const confirmMsg = settings.categoriesLocked
+      ? "Are you sure you want to unlock category management? All admins will be able to add, edit, or delete categories."
+      : "Are you sure you want to lock category management? All modifications to categories and nominees will be blocked.";
+    if (!confirm(confirmMsg)) return;
+
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: settings.status,
+          endsAt: settings.endsAt,
+          categoriesLocked: !settings.categoriesLocked,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error ?? "Failed to update category lock status");
+      }
+
+      setSettings(data.settings);
+      setSuccess(`Category management has been ${data.settings.categoriesLocked ? "locked" : "unlocked"} successfully.`);
+    } catch (err: any) {
+      setError(err.message || "Failed to update lock status.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleUpdateStatus = async (newStatus: "active" | "stopped") => {
     if (!settings) return;
@@ -239,7 +289,7 @@ export default function SettingsPage() {
             <p>Loading election settings...</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Status Panel */}
             <div className="bg-white border rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-sm">
               <div className="space-y-4">
@@ -352,6 +402,67 @@ export default function SettingsPage() {
                   >
                     <span className="material-symbols-outlined">timer_off</span>
                   </button>
+                )}
+              </div>
+            </div>
+
+            {/* Category Lock Panel */}
+            <div className="bg-white border rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-sm">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-primary text-2xl">
+                    {settings?.categoriesLocked ? "lock" : "lock_open"}
+                  </span>
+                  <h2 className="text-lg font-bold">Category Lock</h2>
+                </div>
+                <p className="text-xs text-on-surface-variant leading-relaxed">
+                  Lock category modifications. When locked, admins are prevented from adding, editing, or deleting categories or nominees.
+                </p>
+
+                <div className="mt-4 border-t pt-4">
+                  <div className="flex items-center justify-between p-4 bg-surface-container-lowest rounded-xl border border-outline-variant/60">
+                    <div>
+                      <div className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
+                        Lock Status
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span
+                          className={`w-2.5 h-2.5 rounded-full ${
+                            settings?.categoriesLocked
+                              ? "bg-red-500"
+                              : "bg-green-500 animate-pulse"
+                          }`}
+                        />
+                        <span className="font-bold text-base md:text-lg">
+                          {settings?.categoriesLocked ? "LOCKED" : "UNLOCKED"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-4 border-t flex flex-col gap-3">
+                {isSuperAdmin ? (
+                  <button
+                    onClick={handleToggleCategoryLock}
+                    disabled={saving}
+                    className={`w-full py-3.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 text-white ${
+                      settings?.categoriesLocked
+                        ? "bg-[#10B981] hover:bg-[#059669]"
+                        : "bg-[#EF4444] hover:bg-[#DC2626]"
+                    }`}
+                  >
+                    <span className="material-symbols-outlined">
+                      {settings?.categoriesLocked ? "lock_open" : "lock"}
+                    </span>
+                    {settings?.categoriesLocked ? "Unlock Categories" : "Lock Categories"}
+                  </button>
+                ) : (
+                  <div className="text-xs text-center text-on-surface-variant font-medium bg-surface-container-low p-3.5 rounded-xl border border-outline-variant/40">
+                    <span className="material-symbols-outlined text-[16px] align-middle mr-1.5 text-outline">info</span>
+                    Only superadmins can toggle category locks.
+                  </div>
                 )}
               </div>
             </div>

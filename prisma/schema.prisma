@@ -95,10 +95,11 @@ model AuditLog {
 }
 
 model ElectionSetting {
-  id        String    @id @default("settings")
-  endsAt    DateTime?
-  status    String    @default("active") // "active" or "stopped"
-  updatedAt DateTime  @updatedAt
+  id               String    @id @default("settings")
+  endsAt           DateTime?
+  status           String    @default("active") // "active" or "stopped"
+  categoriesLocked Boolean   @default(false)
+  updatedAt        DateTime  @updatedAt
 }
 
 
