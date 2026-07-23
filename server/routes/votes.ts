@@ -20,6 +20,17 @@ router.post("/", async (req, res) => {
     return;
   }
 
+  // Check if election is closed
+  const settings = await prisma.electionSetting.findUnique({
+    where: { id: "settings" },
+  });
+  const isStopped = settings?.status === "stopped";
+  const isExpired = settings?.endsAt ? new Date() > new Date(settings.endsAt) : false;
+  if (isStopped || isExpired) {
+    res.status(400).json({ error: "Voting is currently closed." });
+    return;
+  }
+
   const selections: Record<string, string> | undefined = req.body?.selections;
   if (!selections || Object.keys(selections).length === 0) {
     res.status(400).json({ error: "No selections submitted." });

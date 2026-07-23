@@ -12,6 +12,7 @@ export default function VerifyPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [electionClosed, setElectionClosed] = useState(false);
 
   useEffect(() => {
     fetch("/api/verify/units")
@@ -21,6 +22,9 @@ export default function VerifyPage() {
           setUnits(data.units);
         } else {
           setUnits([]);
+        }
+        if (data.electionClosed) {
+          setElectionClosed(true);
         }
       })
       .catch((err) => {
@@ -72,6 +76,52 @@ export default function VerifyPage() {
 
     setStatus("done");
     router.push("/vote");
+  }
+
+  if (electionClosed) {
+    return (
+      <>
+        <header className="fixed top-0 w-full bg-surface border-b border-outline-variant shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-between px-container-margin h-16 z-50">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
+              stars
+            </span>
+            <span className="font-display text-headline-md text-primary">MFMCF FUTA WAP</span>
+          </div>
+        </header>
+
+        <main className="flex-grow pt-32 pb-32 px-container-margin max-w-2xl mx-auto w-full flex flex-col items-center justify-center min-h-[80vh]">
+          <section className="bg-white border-2 border-outline-variant/60 rounded-3xl p-8 md:p-12 shadow-xl text-center space-y-6 w-full max-w-md">
+            <div className="inline-flex items-center justify-center bg-purple-50 p-4 rounded-full border border-purple-100 animate-bounce">
+              <span className="material-symbols-outlined text-primary text-4xl">
+                lock_clock
+              </span>
+            </div>
+            
+            <div className="space-y-2">
+              <h1 className="font-headline-lg text-headline-md text-on-surface">
+                Voting is Closed
+              </h1>
+              <p className="text-on-surface-variant font-body-md leading-relaxed">
+                The MFMCF FUTA Worker's Appreciation 2026 election has ended or is currently paused. Ballots can no longer be cast at this time.
+              </p>
+            </div>
+
+            <div className="border-t pt-6">
+              <p className="text-xs text-on-surface-variant/80 font-medium">
+                Thank you for your service and dedication!
+              </p>
+            </div>
+          </section>
+
+          <footer className="mt-12 text-center">
+            <p className="font-label-md text-primary-container font-medium opacity-80 uppercase tracking-widest text-[10px]">
+              PRIESTS OF GOD GENERATION
+            </p>
+          </footer>
+        </main>
+      </>
+    );
   }
 
   return (

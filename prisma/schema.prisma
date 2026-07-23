@@ -94,3 +94,11 @@ model AuditLog {
   createdAt DateTime @default(now())
 }
 
+model ElectionSetting {
+  id        String    @id @default("settings")
+  endsAt    DateTime?
+  status    String    @default("active") // "active" or "stopped"
+  updatedAt DateTime  @updatedAt
+}
+
+

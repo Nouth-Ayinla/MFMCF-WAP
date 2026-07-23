@@ -385,17 +385,17 @@ export default function CategoryManagementPage() {
 
       {/* Form Drawer Overlay (Add / Edit Form Drawer) */}
       {drawerOpen && (
-        <div className="fixed inset-0 z-50 flex overflow-hidden">
+        <div className="fixed inset-0 z-[60] flex overflow-hidden">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40 transition-opacity"
             onClick={() => setDrawerOpen(false)}
           />
 
-          {/* Slider Drawer Panel */}
-          <div className="relative w-screen max-w-md h-full bg-white shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-200 ml-auto">
+          {/* Slider Drawer Panel / Bottom Sheet */}
+          <div className="relative w-full md:w-screen md:max-w-md h-[85vh] md:h-full bg-white shadow-2xl flex flex-col justify-between rounded-t-2xl md:rounded-t-none mt-auto md:mt-0 animate-in slide-in-from-bottom md:slide-in-from-right duration-200 md:ml-auto">
             {/* Header */}
-            <div className="px-6 py-5 border-b border-outline-variant flex items-center justify-between">
+            <div className="px-6 py-5 border-b border-outline-variant flex items-center justify-between rounded-t-2xl md:rounded-t-none">
               <h2 className="text-lg font-bold text-primary">
                 {editingCategory ? "Edit Category" : "Add Category"}
               </h2>
@@ -537,20 +537,20 @@ export default function CategoryManagementPage() {
             </form>
 
             {/* Sticky Actions Footer */}
-            <div className="px-6 py-4 border-t border-outline-variant bg-gray-50 flex items-center gap-3">
+            <div className="px-6 py-4 border-t border-outline-variant bg-surface-container-lowest flex items-center gap-3 rounded-b-2xl md:rounded-b-none pb-safe">
               <button
                 type="submit"
                 disabled={formSaving}
                 onClick={handleSaveCategory}
-                className="flex-1 bg-primary text-white font-semibold py-2.5 px-4 rounded-lg text-sm hover:opacity-90 disabled:opacity-50 transition-all select-none min-h-[44px] flex items-center justify-center gap-1.5"
+                className="flex-grow flex-1 bg-black text-white font-bold py-3 px-4 rounded-xl text-sm hover:bg-[#6B21A8] active:scale-[0.98] disabled:opacity-50 transition-all flex items-center justify-center gap-2 min-h-[44px] shadow-sm cursor-pointer"
               >
-                {formSaving && <span className="material-symbols-outlined animate-spin text-[16px]">sync</span>}
+                {formSaving && <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>}
                 {editingCategory ? "Save Changes" : "Create Category"}
               </button>
               <button
                 type="button"
                 onClick={() => setDrawerOpen(false)}
-                className="flex-1 bg-white border border-outline-variant text-on-surface font-semibold py-2.5 px-4 rounded-lg text-sm hover:bg-surface-container-low transition-all select-none min-h-[44px]"
+                className="flex-1 border border-outline-variant text-on-surface font-semibold py-3 px-4 rounded-xl text-sm hover:bg-surface-container-low transition-all min-h-[44px] cursor-pointer"
               >
                 Cancel
               </button>

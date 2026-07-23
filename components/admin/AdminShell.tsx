@@ -9,6 +9,7 @@ const BASE_NAV_ITEMS = [
   { href: "/admin/workers", label: "Workers & Units", icon: "group" },
   { href: "/admin/categories", label: "Category Management", icon: "category" },
   { href: "/admin/logs", label: "Audit Logs", icon: "history" },
+  { href: "/admin/settings", label: "Settings", icon: "settings" },
 ];
 
 const MANAGE_ADMINS_ITEM = { href: "/admin/manage", label: "Manage Admins", icon: "admin_panel_settings" };
@@ -33,7 +34,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   const navItems = isSuperAdmin ? [...BASE_NAV_ITEMS, MANAGE_ADMINS_ITEM] : BASE_NAV_ITEMS;
   // Bottom tab bar stays to 4 slots even for superadmins — Manage Admins lives in the drawer only.
-  const tabItems = BASE_NAV_ITEMS;
+  const tabItems = BASE_NAV_ITEMS.slice(0, 4);
 
   async function handleSignOut() {
     await fetch("/api/admin/auth/logout", { method: "POST" });
@@ -110,10 +111,6 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                   <span className="text-sm">{item.label}</span>
                 </Link>
               ))}
-              <Link href="/admin/settings" onClick={() => setDrawerOpen(false)} className="flex items-center gap-3 px-6 py-4 opacity-80">
-                <span className="material-symbols-outlined">settings</span>
-                <span className="text-sm">Settings</span>
-              </Link>
               <button onClick={handleSignOut} className="flex items-center gap-3 px-6 py-4 opacity-80 mt-auto mb-6 text-left">
                 <span className="material-symbols-outlined">logout</span>
                 <span className="text-sm">Sign Out</span>

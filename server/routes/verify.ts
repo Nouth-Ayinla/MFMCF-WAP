@@ -13,11 +13,39 @@ router.post("/", async (req, res) => {
     return;
   }
 
+  // Check if election is closed
+  const settings = await prisma.electionSetting.findUnique({
+    where: { id: "settings" },
+  });
+  const isStopped = settings?.status === "stopped";
+  const isExpired = settings?.endsAt ? new Date() > new Date(settings.endsAt) : false;
+  if (isStopped || isExpired) {
+    res.status(400).json({ error: "Voting is currently closed." });
+    return;
+  }
+
   const name: string | undefined = req.body?.name?.trim();
   const unit: string | undefined = req.body?.unit?.trim();
 
   if (!name || !unit) {
     res.status(400).json({ error: "Name and unit are required." });
+    return;
+  }
+
+  const worker = await prisma.worker.findFirst({
+    where: {
+      name: { equals: name, mode: "insensitive" },
+      unit: { equals: unit, mode: "insensitive" },
+    },
+  });
+
+  if (!worker) {
+    res.status(403).json({ error: "Your name and unit were not found in the official worker roster." });
+    return;
+  }
+
+  if (worker.status !== "VERIFIED") {
+    res.status(403).json({ error: "Your account is pending verification. Please contact your unit coordinator." });
     return;
   }
 
@@ -28,19 +56,6 @@ router.post("/", async (req, res) => {
     update: {},
     create: { name, unit, identityHash },
   });
-
-  // Automatically mark this worker as VERIFIED in the roster on successful sign-in
-  try {
-    await prisma.worker.updateMany({
-      where: {
-        name: { equals: name, mode: "insensitive" },
-        unit: { equals: unit, mode: "insensitive" },
-      },
-      data: { status: "VERIFIED" },
-    });
-  } catch (err) {
-    console.error("Failed to auto-verify worker:", err);
-  }
 
   res.cookie(VOTER_COOKIE, voter.id, {
     httpOnly: true,
@@ -66,7 +81,18 @@ router.get("/units", async (req, res) => {
       units = workers.map((w) => w.unit?.trim()).filter(Boolean);
     }
     units = Array.from(new Set(units)).sort();
-    res.json({ units });
+
+    const settings = await prisma.electionSetting.findUnique({
+      where: { id: "settings" },
+    });
+    const electionClosed = settings ? (settings.status === "stopped" || (settings.endsAt ? new Date() > new Date(settings.endsAt) : false)) : false;
+
+    res.json({
+      units,
+      electionClosed,
+      status: settings?.status ?? "active",
+      endsAt: settings?.endsAt ?? null,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to load units." });

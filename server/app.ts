@@ -10,6 +10,7 @@ import adminAuthRouter from "./routes/admin-auth";
 import adminCategoriesRouter from "./routes/admin-categories";
 import adminLogsRouter from "./routes/admin-logs";
 import adminUnitsRouter from "./routes/admin-units";
+import adminSettingsRouter from "./routes/admin-settings";
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/api/admin/overview", adminOverviewRouter);
 app.use("/api/admin/categories", adminCategoriesRouter);
 app.use("/api/admin/logs", adminLogsRouter);
 app.use("/api/admin/units", adminUnitsRouter);
+app.use("/api/admin/settings", adminSettingsRouter);
 
 app.use((_req, res) => {
   res.status(404).json({ error: "Not found" });
